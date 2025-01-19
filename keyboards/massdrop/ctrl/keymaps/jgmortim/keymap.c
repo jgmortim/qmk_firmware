@@ -10,14 +10,30 @@ enum ctrl_keycodes {
     MD_BOOT,               //Restart into bootloader after hold timeout
 };
 
+enum custom_keycodes {
+    // The start of this enum should always be equal to end of ctrl_keycodes + 1
+    A_AC_LOW = MD_BOOT + 1, // Lowercase a with acute accent
+    A_AC_CAP,               // Uppercase A with acute accent
+    E_AC_LOW,               // Lowercase e with acute accent
+    E_AC_CAP,               // Uppercase E with acute accent
+    I_AC_LOW,               // Lowercase i with acute accent
+    I_AC_CAP,               // Uppercase I with acute accent
+    O_AC_LOW,               // Lowercase o with acute accent
+    O_AC_CAP,               // Uppercase O with acute accent
+    U_AC_LOW,               // Lowercase u with acute accent
+    U_AC_CAP,               // Uppercase U with acute accent
+    ENE_LOW,                // Lowercase n with tilde accent
+    ENE_CAP                 // Uppercase N with tilde accent
+};
+
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [0] = LAYOUT(
-        KC_ESC,       KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,             KC_PSCR, KC_SCRL, KC_PAUS,
-        LT(2,KC_GRV), KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_MINS, KC_EQL,  KC_BSPC,   KC_INS,  KC_HOME, KC_PGUP,
-        KC_TAB,       KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC, KC_RBRC, KC_BSLS,   KC_DEL,  KC_END,  KC_PGDN,
-        KC_CAPS,      KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT, KC_ENT,
-        KC_LSFT,      KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT,                              KC_UP,
-        KC_LCTL,      KC_LGUI, KC_LALT,                   KC_SPC,                             KC_RALT, MO(1),   KC_APP,  KC_RCTL,            KC_LEFT, KC_DOWN, KC_RGHT
+        KC_ESC,        KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,             KC_PSCR, KC_SCRL, KC_PAUS,
+        LT(2,KC_GRV),  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_MINS, KC_EQL,  KC_BSPC,   KC_INS,  KC_HOME, KC_PGUP,
+        KC_TAB,        KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC, KC_RBRC, KC_BSLS,   KC_DEL,  KC_END,  KC_PGDN,
+        LT(3,KC_CAPS), KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT, KC_ENT,
+        KC_LSFT,       KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_RSFT,                              KC_UP,
+        KC_LCTL,       KC_LGUI, KC_LALT,                   KC_SPC,                             KC_RALT, MO(1),   KC_APP,  KC_RCTL,            KC_LEFT, KC_DOWN, KC_RGHT
     ),
     [1] = LAYOUT(
         _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,            KC_MUTE, _______, _______,
@@ -34,6 +50,22 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
         _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,                              _______,
         _______, _______, _______,                   _______,                            _______, _______, _______, _______,            _______, _______, _______
+    ),
+    [3] = LAYOUT(
+        _______,       _______,  _______, _______,  _______, _______, _______, _______,  _______,  _______,  _______, _______, _______,            _______, _______, _______,
+        _______,       _______,  _______, _______,  _______, _______, _______, _______,  _______,  _______,  _______, _______, _______, _______,   _______, _______, _______,
+        _______,       _______,  _______, E_AC_LOW, _______, _______, _______, U_AC_LOW, I_AC_LOW, O_AC_LOW, _______, _______, _______, _______,   _______, _______, _______,
+        _______,       A_AC_LOW, _______, _______,  _______, _______, _______, _______,  _______,  _______,  _______, _______, _______,
+        LT(4,KC_TRNS), _______,  _______, _______,  _______, _______, ENE_LOW, _______,  _______,  _______,  _______, _______,                              _______,
+        _______,       _______,  _______,                    _______,                              _______,  _______, _______, _______,            _______, _______, _______
+    ),
+    [4] = LAYOUT(
+        _______,       _______,  _______, _______,  _______, _______, _______, _______,  _______,  _______,  _______, _______, _______,            _______, _______, _______,
+        _______,       _______,  _______, _______,  _______, _______, _______, _______,  _______,  _______,  _______, _______, _______, _______,   _______, _______, _______,
+        _______,       _______,  _______, E_AC_CAP, _______, _______, _______, U_AC_CAP, I_AC_CAP, O_AC_CAP, _______, _______, _______, _______,   _______, _______, _______,
+        _______,       A_AC_CAP, _______, _______,  _______, _______, _______, _______,  _______,  _______,  _______, _______, _______,
+        _______,       _______,  _______, _______,  _______, _______, ENE_CAP, _______,  _______,  _______,  _______, _______,                              _______,
+        _______,       _______,  _______,                    _______,                              _______,  _______, _______, _______,            _______, _______, _______
     )
 };
 
@@ -45,6 +77,67 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     static uint32_t key_timer;
 
     switch (keycode) {
+        case A_AC_LOW: // Lowercase a with acute accent: ALT + 0225
+            if (record->event.pressed) {
+                SEND_STRING(SS_LALT(SS_TAP(X_KP_0) SS_TAP(X_KP_2) SS_TAP(X_KP_2) SS_TAP(X_KP_5)));
+            }
+            return false;
+        case A_AC_CAP: // Uppercase A with acute accent: ALT + 0193
+            if (record->event.pressed) {
+                SEND_STRING(SS_LALT(SS_TAP(X_KP_0) SS_TAP(X_KP_1) SS_TAP(X_KP_9) SS_TAP(X_KP_3)));
+            }
+            return false;
+        case E_AC_LOW: // Lowercase e with acute accent: ALT + 0233
+            if (record->event.pressed) {
+                SEND_STRING(SS_LALT(SS_TAP(X_KP_0) SS_TAP(X_KP_2) SS_TAP(X_KP_3) SS_TAP(X_KP_3)));
+            }
+            return false;
+        case E_AC_CAP: // Uppercase E with acute accent: ALT + 0201
+            if (record->event.pressed) {
+                SEND_STRING(SS_LALT(SS_TAP(X_KP_0) SS_TAP(X_KP_2) SS_TAP(X_KP_0) SS_TAP(X_KP_1)));
+            }
+            return false;
+        case I_AC_LOW: // Lowercase i with acute accent: ALT + 0237
+            if (record->event.pressed) {
+                SEND_STRING(SS_LALT(SS_TAP(X_KP_0) SS_TAP(X_KP_2) SS_TAP(X_KP_3) SS_TAP(X_KP_7)));
+            }
+            return false;
+        case I_AC_CAP: // Uppercase I with acute accent: ALT + 0205
+            if (record->event.pressed) {
+                SEND_STRING(SS_LALT(SS_TAP(X_KP_0) SS_TAP(X_KP_2) SS_TAP(X_KP_0) SS_TAP(X_KP_5)));
+            }
+            return false;
+        case O_AC_LOW: // Lowercase o with acute accent: ALT + 0243
+            if (record->event.pressed) {
+                SEND_STRING(SS_LALT(SS_TAP(X_KP_0) SS_TAP(X_KP_2) SS_TAP(X_KP_4) SS_TAP(X_KP_3)));
+            }
+            return false;
+        case O_AC_CAP: // Uppercase O with acute accent: ALT + 0211
+            if (record->event.pressed) {
+                SEND_STRING(SS_LALT(SS_TAP(X_KP_0) SS_TAP(X_KP_2) SS_TAP(X_KP_1) SS_TAP(X_KP_1)));
+            }
+            return false;
+        case U_AC_LOW: // Lowercase u with acute accent: ALT + 0250
+            if (record->event.pressed) {
+                SEND_STRING(SS_LALT(SS_TAP(X_KP_0) SS_TAP(X_KP_2) SS_TAP(X_KP_5) SS_TAP(X_KP_0)));
+            }
+            return false;
+        case U_AC_CAP: // Uppercase U with acute accent: ALT + 0218
+            if (record->event.pressed) {
+                SEND_STRING(SS_LALT(SS_TAP(X_KP_0) SS_TAP(X_KP_2) SS_TAP(X_KP_1) SS_TAP(X_KP_8)));
+            }
+            return false;
+        case ENE_LOW: // Lowercase n with tilde accent: ALT + 0241
+            if (record->event.pressed) {
+                SEND_STRING(SS_LALT(SS_TAP(X_KP_0) SS_TAP(X_KP_2) SS_TAP(X_KP_4) SS_TAP(X_KP_1)));
+            }
+            return false;
+        case ENE_CAP: // Uppercase N with tilde accent: ALT + 0209
+            if (record->event.pressed) {
+                SEND_STRING(SS_LALT(SS_TAP(X_KP_0) SS_TAP(X_KP_2) SS_TAP(X_KP_0) SS_TAP(X_KP_9)));
+            }
+            return false;
+        // DEFAULTS BELOW
         case U_T_AUTO:
             if (record->event.pressed && MODS_SHIFT && MODS_CTRL) {
                 TOGGLE_FLAG_AND_PRINT(usb_extra_manual, "USB extra port manual mode");

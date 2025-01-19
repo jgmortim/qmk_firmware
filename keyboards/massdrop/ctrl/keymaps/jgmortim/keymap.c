@@ -23,7 +23,9 @@ enum custom_keycodes {
     U_AC_LOW,               // Lowercase u with acute accent
     U_AC_CAP,               // Uppercase U with acute accent
     ENE_LOW,                // Lowercase n with tilde accent
-    ENE_CAP                 // Uppercase N with tilde accent
+    ENE_CAP,                // Uppercase N with tilde accent
+    INV_EXC,                // Inverted exclamation point
+    INV_QUS                 // Inverted question mark
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -61,10 +63,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
     [4] = LAYOUT(
         _______,       _______,  _______, _______,  _______, _______, _______, _______,  _______,  _______,  _______, _______, _______,            _______, _______, _______,
-        _______,       _______,  _______, _______,  _______, _______, _______, _______,  _______,  _______,  _______, _______, _______, _______,   _______, _______, _______,
+        _______,       INV_EXC,  _______, _______,  _______, _______, _______, _______,  _______,  _______,  _______, _______, _______, _______,   _______, _______, _______,
         _______,       _______,  _______, E_AC_CAP, _______, _______, _______, U_AC_CAP, I_AC_CAP, O_AC_CAP, _______, _______, _______, _______,   _______, _______, _______,
         _______,       A_AC_CAP, _______, _______,  _______, _______, _______, _______,  _______,  _______,  _______, _______, _______,
-        _______,       _______,  _______, _______,  _______, _______, ENE_CAP, _______,  _______,  _______,  _______, _______,                              _______,
+        _______,       _______,  _______, _______,  _______, _______, ENE_CAP, _______,  _______,  _______,  INV_QUS, _______,                              _______,
         _______,       _______,  _______,                    _______,                              _______,  _______, _______, _______,            _______, _______, _______
     )
 };
@@ -135,6 +137,16 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case ENE_CAP: // Uppercase N with tilde accent: ALT + 0209
             if (record->event.pressed) {
                 SEND_STRING(SS_LALT(SS_TAP(X_KP_0) SS_TAP(X_KP_2) SS_TAP(X_KP_0) SS_TAP(X_KP_9)));
+            }
+            return false;
+        case INV_EXC: // Inverted exclamation point: ALT + 161
+            if (record->event.pressed) {
+                SEND_STRING(SS_LALT(SS_TAP(X_KP_0) SS_TAP(X_KP_1) SS_TAP(X_KP_6) SS_TAP(X_KP_1)));
+            }
+            return false;
+        case INV_QUS: // Inverted question mark: ALT + 191
+            if (record->event.pressed) {
+                SEND_STRING(SS_LALT(SS_TAP(X_KP_0) SS_TAP(X_KP_1) SS_TAP(X_KP_9) SS_TAP(X_KP_1)));
             }
             return false;
         // DEFAULTS BELOW

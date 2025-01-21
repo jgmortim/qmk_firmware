@@ -1,5 +1,13 @@
 #include QMK_KEYBOARD_H
 
+#define BLACK {HSV_BLACK}
+#define CYAN {HSV_CYAN}
+#define DIM_RED {0, 255, 100}
+#define DIM_WHITE {0, 0, 100}
+
+extern rgb_config_t rgb_matrix_config;
+bool rgb_enabled_flag;                  // Current LED state flag. If false then LED is off.
+
 enum ctrl_keycodes {
     U_T_AUTO = SAFE_RANGE, //USB Extra Port Toggle Auto Detect / Always Active
     U_T_AGCR,              //USB Toggle Automatic GCR control
@@ -70,6 +78,79 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______,       _______,  _______,                    _______,                              _______,  _______, _______, _______,            _______, _______, _______
     )
 };
+
+const uint8_t PROGMEM ledmap[][RGB_MATRIX_LED_COUNT][3] = {
+    [0] = {
+        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,        BLACK, BLACK, BLACK,
+        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,                      BLACK,
+        BLACK, BLACK, BLACK,               BLACK,                      BLACK, BLACK, BLACK, BLACK,        BLACK, BLACK, BLACK,
+        // Boarder; starts bottom right and moves clockwise
+        DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED,
+        DIM_RED, DIM_WHITE, DIM_RED,
+        DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED,
+        DIM_RED, DIM_WHITE, DIM_RED
+    },
+    [1] = {
+        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,        BLACK, BLACK, BLACK,
+        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,                      BLACK,
+        BLACK, BLACK, BLACK,               BLACK,                      BLACK, BLACK, BLACK, BLACK,        BLACK, BLACK, BLACK
+    },
+    [2] = {
+        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,        CYAN,  CYAN,  CYAN,
+        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, CYAN,  CYAN,  CYAN,
+        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, CYAN,  CYAN,  CYAN,  CYAN,
+        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, CYAN,
+        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,                      BLACK,
+        BLACK, BLACK, BLACK,               BLACK,                      BLACK, BLACK, BLACK, BLACK,        BLACK, BLACK, BLACK,
+        // Boarder; starts bottom right and moves clockwise
+        CYAN, CYAN, CYAN, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED,
+        DIM_RED, DIM_WHITE, DIM_RED,
+        DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, CYAN, CYAN, CYAN,
+        CYAN, CYAN, CYAN
+    },
+    [3] = {
+        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,        BLACK, BLACK, BLACK,
+        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,                      BLACK,
+        BLACK, BLACK, BLACK,               BLACK,                      BLACK, BLACK, BLACK, BLACK,        BLACK, BLACK, BLACK,
+        // Boarder; starts bottom right and moves clockwise
+        DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED,
+        DIM_RED, DIM_WHITE, DIM_RED,
+        DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED,
+        DIM_RED, DIM_WHITE, DIM_RED
+    },
+    [4] = {
+        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,        BLACK, BLACK, BLACK,
+        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,                      BLACK,
+        BLACK, BLACK, BLACK,               BLACK,                      BLACK, BLACK, BLACK, BLACK,        BLACK, BLACK, BLACK,
+        // Boarder; starts bottom right and moves clockwise
+        DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED,
+        DIM_RED, DIM_WHITE, DIM_RED,
+        DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED,
+        DIM_RED, DIM_WHITE, DIM_RED
+    }
+};
+
+// Runs just one time when the keyboard initializes.
+void matrix_init_user(void) {
+    rgb_enabled_flag = true; // Initially, keyboard RGB is enabled. Change to false config.h initializes RGB disabled.
+};
+
+// Runs just one time after everything else has initialized.
+void keyboard_post_init_user(void) {
+    rgb_matrix_enable();
+}
 
 #define MODS_SHIFT  (get_mods() & MOD_MASK_SHIFT)
 #define MODS_CTRL   (get_mods() & MOD_MASK_CTRL)
@@ -218,4 +299,34 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         default:
             return true; //Process all other keycodes normally
     }
+}
+
+
+void set_layer_color(int layer) {
+    for (int i = 0; i < RGB_MATRIX_LED_COUNT; i++) {
+        HSV hsv = {
+            .h = pgm_read_byte(&ledmap[layer][i][0]),
+            .s = pgm_read_byte(&ledmap[layer][i][1]),
+            .v = pgm_read_byte(&ledmap[layer][i][2]),
+        };
+        if (hsv.h || hsv.s || hsv.v) {
+            RGB rgb = hsv_to_rgb(hsv);
+            float f = (float)rgb_matrix_config.hsv.v / UINT8_MAX;
+            rgb_matrix_set_color(i, f * rgb.r, f * rgb.g, f * rgb.b);
+        } else if (layer != 1) {
+            // Only deactivate non-defined key LEDs at layers other than FN. Because at FN we have RGB adjustments and need to see them live.
+            // If the values are all false then it's a transparent key and deactivate LED at this layer
+            rgb_matrix_set_color(i, 0, 0, 0);
+        }
+    }
+}
+
+bool rgb_matrix_indicators_user(void) {
+    if (
+        rgb_matrix_get_flags() == LED_FLAG_NONE ||
+        rgb_matrix_get_flags() == LED_FLAG_UNDERGLOW) {
+            return true;
+        }
+    set_layer_color(get_highest_layer(layer_state));
+    return false;
 }

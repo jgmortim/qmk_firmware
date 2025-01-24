@@ -1,9 +1,9 @@
 #include QMK_KEYBOARD_H
 
-#define BLACK {HSV_BLACK}
 #define CYAN {HSV_CYAN}
 #define DIM_RED {0, 255, 100}
 #define DIM_WHITE {0, 0, 100}
+#define ______ {HSV_BLACK} // 5 underscores instead of the 6 used by the KC_TRNS alias.
 
 extern rgb_config_t rgb_matrix_config;
 bool rgb_enabled_flag; // Current LED state flag. If false then LED is off.
@@ -83,51 +83,46 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 const uint8_t PROGMEM ledmap[][RGB_MATRIX_LED_COUNT][3] = {
     [_KL] = {
-        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,        BLACK, BLACK, BLACK,
-        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
-        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
-        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
-        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,                      BLACK,
-        BLACK, BLACK, BLACK,               BLACK,                      BLACK, BLACK, BLACK, BLACK,        BLACK, BLACK, BLACK,
-        // Boarder; starts bottom right and moves clockwise
-        DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED,
+        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,         ______, ______, ______,
+        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,
+        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,
+        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,
+        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,                         ______,
+        ______, ______, ______,                 ______,                         ______, ______, ______, ______,         ______, ______, ______,
+        /* Boarder; starts bottom right and moves clockwise */
+        DIM_RED, DIM_RED,   DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED,
         DIM_RED, DIM_WHITE, DIM_RED,
-        DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED,
+        DIM_RED, DIM_RED,   DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED,
         DIM_RED, DIM_WHITE, DIM_RED
     },
     [_FL] = {
-        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,        BLACK, BLACK, BLACK,
-        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
-        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
-        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
-        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,                      BLACK,
-        BLACK, BLACK, BLACK,               BLACK,                      BLACK, BLACK, BLACK, BLACK,        BLACK, BLACK, BLACK
+        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,         ______, ______, ______,
+        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,
+        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,
+        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,
+        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,                         ______,
+        ______, ______, ______,                 ______,                         ______, ______, ______, ______,         ______, ______, ______
     },
     [_NL] = {
-        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,        CYAN,  CYAN,  CYAN,
-        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, CYAN,  CYAN,  CYAN,
-        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, CYAN,  CYAN,  CYAN,  CYAN,
-        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, CYAN,
-        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,                      BLACK,
-        BLACK, BLACK, BLACK,               BLACK,                      BLACK, BLACK, BLACK, BLACK,        BLACK, BLACK, BLACK,
-        // Boarder; starts bottom right and moves clockwise
-        CYAN, CYAN, CYAN, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED,
-        DIM_RED, DIM_WHITE, DIM_RED,
-        DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, CYAN, CYAN, CYAN,
-        CYAN, CYAN, CYAN
+        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,         CYAN,    CYAN,   CYAN,
+        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, CYAN,    CYAN,   CYAN,
+        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, CYAN,   CYAN,    CYAN,   CYAN,
+        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, CYAN,
+        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,                          ______,
+        ______, ______, ______,                 ______,                         ______, ______, ______, ______,          ______, ______, ______,
+        /* Boarder; starts bottom right and moves clockwise */
+        CYAN,   CYAN,   CYAN,   ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,
+        ______, ______, ______,
+        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, CYAN,   CYAN,   CYAN,
+        CYAN,   CYAN,   CYAN
     },
     [_SL] = {
-        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,        BLACK, BLACK, BLACK,
-        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
-        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
-        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
-        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,                      BLACK,
-        BLACK, BLACK, CYAN,                BLACK,                      BLACK, BLACK, BLACK, BLACK,        BLACK, BLACK, BLACK,
-        // Boarder; starts bottom right and moves clockwise
-        DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED,
-        DIM_RED, DIM_WHITE, DIM_RED,
-        DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED, DIM_RED, DIM_WHITE, DIM_RED, DIM_RED,
-        DIM_RED, DIM_WHITE, DIM_RED
+        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,         ______, ______, ______,
+        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,
+        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,
+        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,
+        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,                         ______,
+        ______, ______, CYAN,                   ______,                         ______, ______, ______, ______,         ______, ______, ______
     }
 };
 
@@ -318,10 +313,33 @@ void set_layer_color(int layer) {
             RGB rgb = hsv_to_rgb(hsv);
             float f = (float)rgb_matrix_config.hsv.v / UINT8_MAX;
             rgb_matrix_set_color(i, f * rgb.r, f * rgb.g, f * rgb.b);
-        } else if (layer != 1) {
-            // Only deactivate non-defined key LEDs at layers other than FN. Because at FN we have RGB adjustments and need to see them live.
-            // If the values are all false then it's a transparent key and deactivate LED at this layer
-            rgb_matrix_set_color(i, 0, 0, 0);
+        } else if (layer != _FL) {
+            // Only read lower layer LEDs at layers other than FN. Because at FN we have RGB adjustments and need to see them live.
+            bool is_undefined = false;
+            // Attempt to get HSV values from a lower active layer, working down from the current layer.
+            for (int lower_layer_j = layer - 1; lower_layer_j >= 0; lower_layer_j--) {
+                // IS_LAYER_ON(_KL) returns false for some reason, might have something to do with it being the default
+                // layer. For my purposes, _KL is always active so I added "|| lower_layer_j == _KL".
+                if (IS_LAYER_ON(lower_layer_j) || lower_layer_j == _KL) {
+                    HSV lower_hsv = {
+                        .h = pgm_read_byte(&ledmap[lower_layer_j][i][0]),
+                        .s = pgm_read_byte(&ledmap[lower_layer_j][i][1]),
+                        .v = pgm_read_byte(&ledmap[lower_layer_j][i][2]),
+                    };
+                    if (lower_hsv.h || lower_hsv.s || lower_hsv.v) {
+                        RGB rgb = hsv_to_rgb(lower_hsv);
+                        float f = (float)rgb_matrix_config.hsv.v / UINT8_MAX;
+                        rgb_matrix_set_color(i, f * rgb.r, f * rgb.g, f * rgb.b);
+                        is_undefined = false;
+                        break;
+                    }
+                }
+            }
+
+            if (is_undefined) {
+                // If the values are all false then it's a transparent key and deactivate LED at this layer
+                rgb_matrix_set_color(i, 0, 0, 0);
+            }
         }
     }
 }

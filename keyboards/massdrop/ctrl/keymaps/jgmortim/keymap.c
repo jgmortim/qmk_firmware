@@ -315,7 +315,7 @@ void set_layer_color(int layer) {
             rgb_matrix_set_color(i, f * rgb.r, f * rgb.g, f * rgb.b);
         } else if (layer != _FL) {
             // Only read lower layer LEDs at layers other than FN. Because at FN we have RGB adjustments and need to see them live.
-            bool is_undefined = false;
+            bool is_undefined = true;
             // Attempt to get HSV values from a lower active layer, working down from the current layer.
             for (int lower_layer_j = layer - 1; lower_layer_j >= 0; lower_layer_j--) {
                 // IS_LAYER_ON(_KL) returns false for some reason, might have something to do with it being the default

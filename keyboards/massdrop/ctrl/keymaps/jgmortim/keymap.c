@@ -1,12 +1,21 @@
 #include QMK_KEYBOARD_H
 
+#define MILLISECONDS_IN_SECOND 1000
+
 #define CYAN {HSV_CYAN}
 #define DIM_RED {0, 255, 100}
 #define DIM_WHITE {0, 0, 100}
 #define ______ {HSV_BLACK} // 5 underscores instead of the 6 used by the KC_TRNS alias.
 
+#define RGB_TIME_OUT 300  // 300 seconds (5 minutes).
+
 extern rgb_config_t rgb_matrix_config;
-bool rgb_enabled_flag; // Current LED state flag. If false then LED is off.
+
+bool rgb_enabled_flag;                  // Current LED state flag. If false then LED is off.
+bool rgb_time_out_enable;               // Idle LED toggle enable. If false then LED will not turn off after idle timeout.
+bool rgb_time_out_user_value;           // This holds the toggle value set by user with ROUT_TG. It's necessary as RGB_TOG changes timeout enable.
+uint16_t rgb_time_out_seconds;          // Idle LED timeout value, in seconds not milliseconds
+led_flags_t rgb_time_out_saved_flag;    // Store LED flag before timeout so it can be restored when LED is turned on again.
 
 enum tapdance_keycodes {
     TD_ALT_SL = 0 // Tap dance key to switch to Spanish layer
@@ -40,6 +49,10 @@ enum custom_keycodes {
     INV_EXC,               // Inverted exclamation point
     INV_QUS                // Inverted question mark
 };
+
+static uint16_t idle_timer;             // Idle LED timeout timer
+static uint8_t idle_second_counter;     // Idle LED seconds counter, counts seconds not milliseconds
+static uint8_t key_event_counter;       // This counter is used to check if any keys are being held
 
 /* Associate tap dance key with its functionality */
 tap_dance_action_t tap_dance_actions[] = {
@@ -128,13 +141,39 @@ const uint8_t PROGMEM ledmap[][RGB_MATRIX_LED_COUNT][3] = {
 
 /* Runs just one time when the keyboard initializes. */
 void matrix_init_user(void) {
-    rgb_enabled_flag = true; // Initially, keyboard RGB is enabled. Change to false config.h initializes RGB disabled.
+    idle_second_counter = 0;                            // Counter for number of seconds keyboard has been idle.
+    key_event_counter = 0;                              // Counter to determine if keys are being held, neutral at 0.
+    rgb_time_out_seconds = RGB_TIME_OUT;                // RGB timeout initialized to its default.
+    rgb_time_out_enable = true;                         // Enable RGB timeout by default.
+    rgb_enabled_flag = true;                            // Initially, keyboard RGB is enabled.
+    rgb_time_out_saved_flag = rgb_matrix_get_flags();   // Save RGB matrix state for when keyboard comes back from ide.
 };
 
 /* Runs just one time after everything else has initialized. */
 void keyboard_post_init_user(void) {
     rgb_matrix_enable();
 }
+
+/* Runs constantly in the background, in a loop. */
+void matrix_scan_user(void) {
+    if(rgb_time_out_enable && rgb_enabled_flag) {
+        // If the key event counter is not zero then some key was pressed down but not released, thus reset the timeout counter.
+        if (key_event_counter) {
+            idle_second_counter = 0;
+        } else if (timer_elapsed(idle_timer) > MILLISECONDS_IN_SECOND) {
+            idle_second_counter++;
+            idle_timer = timer_read();
+        }
+
+        if (idle_second_counter >= rgb_time_out_seconds) {
+            rgb_time_out_saved_flag = rgb_matrix_get_flags();
+            rgb_matrix_set_flags(LED_FLAG_NONE);
+            rgb_matrix_disable_noeeprom();
+            rgb_enabled_flag = false;
+            idle_second_counter = 0;
+        }
+    }
+};
 
 #define MODS_SHIFT  (get_mods() & MOD_MASK_SHIFT)
 #define MODS_CTRL   (get_mods() & MOD_MASK_CTRL)
@@ -149,6 +188,24 @@ void send_string_without_mods(const char *string) {
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     static uint32_t key_timer;
+
+    // Increment key event counter for every press and decrement for every release.
+    if (record->event.pressed) {
+        key_event_counter++;
+    } else {
+        key_event_counter--;
+    }
+
+    if (rgb_time_out_enable) {
+        idle_timer = timer_read();
+        // Reset the seconds counter. Without this, something like press> leave x seconds> press, would be x seconds on the effective counter not 0 as it should.
+        idle_second_counter = 0;
+        if (!rgb_enabled_flag) {
+            rgb_matrix_enable_noeeprom();
+            rgb_matrix_set_flags(rgb_time_out_saved_flag);
+            rgb_enabled_flag = true;
+        }
+    }
 
     switch (keycode) {
         case A_ACUTE:
@@ -345,8 +402,7 @@ void set_layer_color(int layer) {
 }
 
 bool rgb_matrix_indicators_user(void) {
-    if (
-        rgb_matrix_get_flags() == LED_FLAG_NONE ||
+    if (rgb_matrix_get_flags() == LED_FLAG_NONE ||
         rgb_matrix_get_flags() == LED_FLAG_UNDERGLOW) {
             return true;
         }

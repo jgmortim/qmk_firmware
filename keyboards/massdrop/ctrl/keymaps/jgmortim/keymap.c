@@ -52,7 +52,7 @@ enum custom_keycodes {
 };
 
 static uint16_t idle_timer;             // Idle LED timeout timer
-static uint16_t idle_second_counter;     // Idle LED seconds counter, counts seconds not milliseconds
+static uint16_t idle_second_counter;    // Idle LED seconds counter, counts seconds not milliseconds
 static uint8_t key_event_counter;       // This counter is used to check if any keys are being held
 
 /* Associate tap dance key with its functionality */
@@ -72,9 +72,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_FL] = LAYOUT(
         _______, _______,  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          KC_MUTE, _______, _______,
         _______, _______,  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, KC_MPLY, KC_MSTP, KC_VOLU,
-        _______, RGB_SPD,  RGB_VAI, RGB_SPI, RGB_HUI, RGB_SAI, _______, U_T_AUTO,U_T_AGCR,_______, _______, _______, _______, _______, KC_MPRV, KC_MNXT, KC_VOLD,
-        _______, RGB_RMOD, RGB_VAD, RGB_MOD, RGB_HUD, RGB_SAD, _______, _______, _______, _______, _______, _______, _______,
-        _______, RGB_TOG,  _______, _______, _______, MD_BOOT, NK_TOGG, _______, _______, _______, _______, _______,                            _______,
+        _______, _______,  _______, _______, _______, _______, _______, U_T_AUTO,U_T_AGCR,_______, _______, _______, _______, _______, KC_MPRV, KC_MNXT, KC_VOLD,
+        _______, _______,  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
+        _______, _______,  _______, _______, _______, MD_BOOT, NK_TOGG, _______, _______, _______, _______, _______,                            _______,
         _______, _______,  _______,                   _______,                            _______, _______, _______, _______,          _______, _______, _______
     ),
     [_NL] = LAYOUT(
@@ -112,9 +112,9 @@ const uint8_t PROGMEM ledmap[][RGB_MATRIX_LED_COUNT][3] = {
     [_FL] = {
         ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,         ______, ______, ______,
         ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,
-        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,
+        ______, ______, ______, ______, ______, ______, ______, GOLD,   GOLD,   ______, ______, ______, ______, ______, ______, ______, ______,
         ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,
-        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,                         ______,
+        ______, ______, ______, ______, ______, GOLD,   GOLD,   ______, ______, ______, ______, ______,                         ______,
         ______, ______, ______,                 ______,                         ______, ______, ______, ______,         ______, ______, ______
     },
     [_NL] = {
@@ -204,6 +204,23 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     }
 
     switch (keycode) {
+        /* Change Win + c to be calculator instead of Cortana */
+        case KC_C:
+            if (record->event.pressed && get_mods() == MOD_BIT(KC_LGUI)) {
+                // Win + r, "CALC", enter
+                SEND_STRING(SS_DOWN(X_LGUI) SS_TAP(X_R) SS_UP(X_LGUI) "CALC" SS_TAP(X_ENT));
+                return false;
+            }
+            return true;
+        /* Change Win + s to be Snipping Tool instead of search */
+        case KC_S:
+            if (record->event.pressed && get_mods() == MOD_BIT(KC_LGUI)) {
+                // Win + r, "CALC", enter
+                SEND_STRING(SS_DOWN(X_LGUI) SS_TAP(X_R) SS_UP(X_LGUI) "SnippingTool" SS_TAP(X_ENT));
+                return false;
+            }
+            return true;
+        /* Spanish Letters and Punctuation */
         case A_ACUTE:
             if (record->event.pressed) {
                 if (MODS_SHIFT) { // Uppercase A with acute accent: ALT + 0193
@@ -284,7 +301,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             layer_off(3);
             return false;
-        // DEFAULTS BELOW
+        /* Defaults */
         case U_T_AUTO:
             if (record->event.pressed && MODS_SHIFT && MODS_CTRL) {
                 TOGGLE_FLAG_AND_PRINT(usb_extra_manual, "USB extra port manual mode");
@@ -324,32 +341,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 }
             }
             return false;
-        case RGB_TOG:
-            if (record->event.pressed) {
-              switch (rgb_matrix_get_flags()) {
-                case LED_FLAG_ALL: {
-                    rgb_matrix_set_flags(LED_FLAG_KEYLIGHT | LED_FLAG_MODIFIER | LED_FLAG_INDICATOR);
-                    rgb_matrix_set_color_all(0, 0, 0);
-                  }
-                  break;
-                case (LED_FLAG_KEYLIGHT | LED_FLAG_MODIFIER | LED_FLAG_INDICATOR): {
-                    rgb_matrix_set_flags(LED_FLAG_UNDERGLOW);
-                    rgb_matrix_set_color_all(0, 0, 0);
-                  }
-                  break;
-                case LED_FLAG_UNDERGLOW: {
-                    rgb_matrix_set_flags(LED_FLAG_NONE);
-                    rgb_matrix_disable_noeeprom();
-                  }
-                  break;
-                default: {
-                    rgb_matrix_set_flags(LED_FLAG_ALL);
-                    rgb_matrix_enable_noeeprom();
-                  }
-                  break;
-              }
-            }
-            return false;
         default:
             return true; //Process all other keycodes normally
     }
@@ -366,9 +357,9 @@ void set_layer_color(int layer) {
             RGB rgb = hsv_to_rgb(hsv);
             float f = (float)rgb_matrix_config.hsv.v / UINT8_MAX;
             rgb_matrix_set_color(i, f * rgb.r, f * rgb.g, f * rgb.b);
-        } else if (layer != _FL) {
-            // Only read lower layer LEDs at layers other than FN. Because at FN we have RGB adjustments and need to see them live.
+        } else {
             bool is_undefined = true;
+
             // Attempt to get HSV values from a lower active layer, working down from the current layer.
             for (int lower_layer_j = layer - 1; lower_layer_j >= 0; lower_layer_j--) {
                 // IS_LAYER_ON(_KL) returns false for some reason, might have something to do with it being the default

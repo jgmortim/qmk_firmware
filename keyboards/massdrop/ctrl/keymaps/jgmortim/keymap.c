@@ -52,7 +52,7 @@ enum custom_keycodes {
 };
 
 static uint16_t idle_timer;             // Idle LED timeout timer
-static uint8_t idle_second_counter;     // Idle LED seconds counter, counts seconds not milliseconds
+static uint16_t idle_second_counter;     // Idle LED seconds counter, counts seconds not milliseconds
 static uint8_t key_event_counter;       // This counter is used to check if any keys are being held
 
 /* Associate tap dance key with its functionality */

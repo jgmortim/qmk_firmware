@@ -1,3 +1,21 @@
+/*
+QMK Firmware Massdrop CTRL jgmortim Keymap
+Copyright (C) 2025 jgmortim
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include QMK_KEYBOARD_H
 
 #define MILLISECONDS_IN_SECOND 1000
@@ -204,7 +222,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     }
 
     switch (keycode) {
-        /* Change Win + c to be calculator instead of Cortana */
+        /* Change Win + c to be Calculator instead of Cortana */
         case KC_C:
             if (record->event.pressed && get_mods() == MOD_BIT(KC_LGUI)) {
                 // Win + r, "CALC", enter

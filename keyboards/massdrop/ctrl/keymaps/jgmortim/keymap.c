@@ -227,7 +227,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case KC_C:
             if (record->event.pressed && get_mods() == MOD_BIT(KC_LGUI)) {
                 // Win + r, "CALC", enter
-                SEND_STRING(SS_DOWN(X_LGUI) SS_TAP(X_R) SS_UP(X_LGUI) "CALC" SS_TAP(X_ENT));
+                SEND_STRING(SS_DOWN(X_LGUI) SS_TAP(X_R) SS_UP(X_LGUI) SS_DELAY(50) "CALC" SS_TAP(X_ENT));
                 return false;
             }
             return true;
@@ -235,7 +235,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case KC_S:
             if (record->event.pressed && get_mods() == MOD_BIT(KC_LGUI)) {
                 // Win + r, "CALC", enter
-                SEND_STRING(SS_DOWN(X_LGUI) SS_TAP(X_R) SS_UP(X_LGUI) "SnippingTool" SS_TAP(X_ENT));
+                SEND_STRING(SS_DOWN(X_LGUI) SS_TAP(X_R) SS_UP(X_LGUI) SS_DELAY(50) "SnippingTool" SS_TAP(X_ENT));
                 return false;
             }
             return true;

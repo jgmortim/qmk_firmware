@@ -23,9 +23,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define COPPER {12, 255, 100}
 #define CPPR_BRT {12, 255, 225}
 #define CYAN {HSV_CYAN}
-#define WIN_IND {HSV_SPRINGGREEN}  // Windows mode indicator LED color.
-#define LNX_IND {HSV_PURPLE} // Linux mode indicator LED color.
-#define ______ {HSV_OFF}    // 5 underscores instead of the 6 used by the KC_TRNS alias.
+#define WIN_IND {HSV_SPRINGGREEN} // Windows mode indicator LED color.
+#define LNX_IND {HSV_PURPLE}      // Linux mode indicator LED color.
+#define ______ {HSV_OFF}          // 5 underscores instead of the 6 used by the KC_TRNS alias.
 
 #define RGB_TIME_OUT 300       // 300 seconds (5 minutes).
 #define OS_MODE_IND_LED 77     // Index of the OS mode indicator LED (77 is Win key).
@@ -221,8 +221,8 @@ void matrix_scan_user(void) {
 
 /* Executes the given alt code (Windows only). */
 void send_alt_code(char code[]) {
-    uint8_t mod_state = get_mods(); // Gets the current mods
-    unregister_mods(mod_state);     // Turns all active mods off
+    uint8_t mod_state = get_mods(); // Gets the current mods.
+    unregister_mods(mod_state);     // Turns all active mods off.
 
     SEND_STRING(SS_DOWN(X_LALT));
     for(int i = 0; code[i] != '\0';  i++) {
@@ -241,26 +241,39 @@ void send_alt_code(char code[]) {
     }
     SEND_STRING(SS_UP(X_LALT));
 
-    register_mods(mod_state); // Restores the mods to their original state
+    register_mods(mod_state); // Restores the mods to their original state.
 }
 
 /* Inserts the given Unicode character via Unicode-entry mode (Linux only). */
 void send_unicode(const char *code) {
-    uint8_t mod_state = get_mods(); // Gets the current mods
-    unregister_mods(mod_state);     // Turns all active mods off
+    uint8_t mod_state = get_mods();     // Gets the current mods.
+    unregister_mods(mod_state);         // Turns all active mods off.
 
-    SEND_STRING(SS_DOWN(X_LCTL) SS_DOWN(X_RSFT) "u" SS_UP(X_RSFT) SS_UP(X_LCTL)); // Ctrl + Shift  + U,
-    SEND_STRING(code);                                                            // type in the code,
-    SEND_STRING(SS_TAP(X_ENT));                                                   // and press enter.
+    SEND_STRING(SS_LCTL(SS_LSFT("u"))); // Ctrl + Shift  + U,
+    SEND_STRING(code);                  // type in the code,
+    SEND_STRING(SS_TAP(X_ENT));         // and press enter.
 
-    register_mods(mod_state); // Restores the mods to their original state
+    register_mods(mod_state);           // Restores the mods to their original state.
 }
 
 /* Enters the given command into the Windows Run dialog (Windows only). */
 void windows_run(const char *command) {
+    //TODO try using SS_LGUI("r")
     SEND_STRING(SS_DOWN(X_LGUI) SS_TAP(X_R) SS_UP(X_LGUI) SS_DELAY(50)); // Open the run dialog,
     SEND_STRING(command);                                                // type in the command,
     SEND_STRING(SS_TAP(X_ENT));                                          // and press enter.
+}
+
+/* Enters the given command into the Linux Run dialog (Linux only). */
+void linux_run(const char *command) {
+    uint8_t mod_state = get_mods();                  // Gets the current mods.
+    unregister_mods(mod_state);                      // Turns all active mods off.
+
+    SEND_STRING(SS_LALT(SS_TAP(X_F2)) SS_DELAY(50)); // Open the run dialog,
+    SEND_STRING(command);                            // type in the command,
+    SEND_STRING(SS_TAP(X_ENT));                      // and press enter.
+
+    register_mods(mod_state);                        // Restores the mods to their original state.
 }
 
 #define MODS_SHIFT  (get_mods() & MOD_MASK_SHIFT)
@@ -300,8 +313,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             return true;
         /* Change Win + c to be Calculator instead of Cortana */
         case KC_C:
-            if (record->event.pressed && get_mods() == MOD_BIT(KC_LGUI) && os_mode == WINDOWS) {
-                windows_run("CALC");
+            if (record->event.pressed && get_mods() == MOD_BIT(KC_LGUI)) {
+                os_mode == WINDOWS
+                    ? windows_run("CALC")
+                    : linux_run("gnome-calculator");
                 return false;
             }
             return true;

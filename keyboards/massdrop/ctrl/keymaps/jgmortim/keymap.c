@@ -23,8 +23,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define COPPER {12, 255, 100}
 #define CPPR_BRT {12, 255, 225}
 #define CYAN {HSV_CYAN}
-#define WIN_IND {HSV_BLUE}  // Windows mode indicator LED color.
-#define LNX_IND {HSV_GREEN} // Linux mode indicator LED color.
+#define WIN_IND {HSV_SPRINGGREEN}  // Windows mode indicator LED color.
+#define LNX_IND {HSV_PURPLE} // Linux mode indicator LED color.
 #define ______ {HSV_OFF}    // 5 underscores instead of the 6 used by the KC_TRNS alias.
 
 #define RGB_TIME_OUT 300       // 300 seconds (5 minutes).
@@ -467,7 +467,7 @@ layer_state_t layer_state_set_user(layer_state_t state) {
 void set_layer_color(int layer) {
     for (int i = 0; i < RGB_MATRIX_LED_COUNT; i++) {
         /* Special Indicator Logic */
-        if (i == OS_MODE_IND_LED && (os_mode_led_flag || layer == _FL)) {
+        if (i == OS_MODE_IND_LED && (os_mode_led_flag || IS_LAYER_ON(_FL))) {
             HSV win_hsv = WIN_IND;
             HSV lnx_hsv = LNX_IND;
 

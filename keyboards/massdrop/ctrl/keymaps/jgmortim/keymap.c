@@ -258,10 +258,9 @@ void send_unicode(const char *code) {
 
 /* Enters the given command into the Windows Run dialog (Windows only). */
 void windows_run(const char *command) {
-    //TODO try using SS_LGUI("r")
-    SEND_STRING(SS_DOWN(X_LGUI) SS_TAP(X_R) SS_UP(X_LGUI) SS_DELAY(50)); // Open the run dialog,
-    SEND_STRING(command);                                                // type in the command,
-    SEND_STRING(SS_TAP(X_ENT));                                          // and press enter.
+    SEND_STRING(SS_LGUI("r") SS_DELAY(50)); // Open the run dialog,
+    SEND_STRING(command);                   // type in the command,
+    SEND_STRING(SS_TAP(X_ENT));             // and press enter.
 }
 
 /* Enters the given command into the Linux Run dialog (Linux only). */

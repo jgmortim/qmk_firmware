@@ -25,9 +25,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define CYAN {HSV_CYAN}
 #define WIN_IND {HSV_SPRINGGREEN} // Windows mode indicator LED color.
 #define LNX_IND {HSV_PURPLE}      // Linux mode indicator LED color.
+#define CAPS_IND {12, 255, 225}   // Caps Lock indicator LED color.
 #define ______ {HSV_OFF}          // 5 underscores instead of the 6 used by the KC_TRNS alias.
 
 #define RGB_TIME_OUT 300       // 300 seconds (5 minutes).
+#define CAPS_LOCK_IND_LED 50   // Index of the Caps Lock indicator LED (50 is the Caps Lock key).
 #define OS_MODE_IND_LED 77     // Index of the OS mode indicator LED (77 is Win key).
 #define OS_MODE_IND_TIME_OUT 3 // 3 second timeout for the OS mode indicator LED.
 
@@ -207,11 +209,13 @@ void matrix_scan_user(void) {
     }
 
     if(os_mode_led_flag) {
+        // Update the second counter after each second.
         if (timer_elapsed(os_ind_led_timer) > MILLISECONDS_IN_SECOND) {
             os_ind_led_second_counter++;
             os_ind_led_timer = timer_read();
         }
 
+        // Turn off OS indicator LED after timeout reached.
         if (os_ind_led_second_counter >= OS_MODE_IND_TIME_OUT) {
             os_mode_led_flag = false;
             os_ind_led_second_counter = 0;
@@ -481,11 +485,19 @@ layer_state_t layer_state_set_user(layer_state_t state) {
 void set_layer_color(int layer) {
     for (int i = 0; i < RGB_MATRIX_LED_COUNT; i++) {
         /* Special Indicator Logic */
-        if (i == OS_MODE_IND_LED && (os_mode_led_flag || IS_LAYER_ON(_FL))) {
+        if (i == OS_MODE_IND_LED && (os_mode_led_flag || IS_LAYER_ON(_FL))) { // OS indicator LED
             HSV win_hsv = WIN_IND;
             HSV lnx_hsv = LNX_IND;
 
             RGB rgb = hsv_to_rgb(os_mode == WINDOWS ? win_hsv : lnx_hsv);
+            float f = (float)rgb_matrix_config.hsv.v / UINT8_MAX;
+            rgb_matrix_set_color(i, f * rgb.r, f * rgb.g, f * rgb.b);
+            continue;
+        }
+        if (i == CAPS_LOCK_IND_LED && host_keyboard_led_state().caps_lock) { // Caps Lock indicator LED
+            HSV hsv = CAPS_IND;
+
+            RGB rgb = hsv_to_rgb(hsv);
             float f = (float)rgb_matrix_config.hsv.v / UINT8_MAX;
             rgb_matrix_set_color(i, f * rgb.r, f * rgb.g, f * rgb.b);
             continue;

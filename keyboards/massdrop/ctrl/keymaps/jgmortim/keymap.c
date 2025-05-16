@@ -26,10 +26,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define WIN_IND {HSV_SPRINGGREEN} // Windows mode indicator LED color.
 #define LNX_IND {HSV_PURPLE}      // Linux mode indicator LED color.
 #define CAPS_IND {12, 255, 225}   // Caps Lock indicator LED color.
+#define SCRL_IND {12, 255, 225}   // Scroll Lock indicator LED color.
 #define ______ {HSV_OFF}          // 5 underscores instead of the 6 used by the KC_TRNS alias.
 
 #define RGB_TIME_OUT 300       // 300 seconds (5 minutes).
 #define CAPS_LOCK_IND_LED 50   // Index of the Caps Lock indicator LED (50 is the Caps Lock key).
+#define SCRL_LOCK_IND_LED 14   // Index of the Scroll Lock indicator LED (14 is the Scroll Lock key).
 #define OS_MODE_IND_LED 77     // Index of the OS mode indicator LED (77 is Win key).
 #define OS_MODE_IND_TIME_OUT 3 // 3 second timeout for the OS mode indicator LED.
 
@@ -496,6 +498,14 @@ void set_layer_color(int layer) {
         }
         if (i == CAPS_LOCK_IND_LED && host_keyboard_led_state().caps_lock) { // Caps Lock indicator LED
             HSV hsv = CAPS_IND;
+
+            RGB rgb = hsv_to_rgb(hsv);
+            float f = (float)rgb_matrix_config.hsv.v / UINT8_MAX;
+            rgb_matrix_set_color(i, f * rgb.r, f * rgb.g, f * rgb.b);
+            continue;
+        }
+        if (i == SCRL_LOCK_IND_LED && host_keyboard_led_state().scroll_lock) { // Scroll Lock indicator LED
+            HSV hsv = SCRL_IND;
 
             RGB rgb = hsv_to_rgb(hsv);
             float f = (float)rgb_matrix_config.hsv.v / UINT8_MAX;

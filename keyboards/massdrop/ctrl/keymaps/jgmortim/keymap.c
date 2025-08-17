@@ -48,6 +48,7 @@ enum ctrl_keycodes {
 
 enum custom_keycodes {
     // The start of this enum should always be equal to end of ctrl_keycodes + 1
+    // Accented letters must all be grouped together and be implemented in accent_table.
     A_ACUTE = MD_BOOT + 1, // A with acute accent
     E_ACUTE,               // E with acute accent
     I_ACUTE,               // I with acute accent
@@ -70,13 +71,14 @@ enum os {
 };
 
 typedef struct {
-    const char *win_norm;
-    const char *win_shift;
-    const char *linux_norm;
-    const char *linux_shift;
+    const char *win_norm;    // Windows alt code for lowercase
+    const char *win_shift;   // Windows alt code for uppercase
+    const char *linux_norm;  // Linux unicode for lowercase
+    const char *linux_shift; // Linux unicode for uppercase
 } accent_entry_t;
 
 static const accent_entry_t accent_table[] = {
+    // Must be in the same order as in custom_keycodes.
     {"0225", "0193", "00E1", "00C1" }, // A_ACUTE
     {"0233", "0201", "00E9", "00C9" }, // E_ACUTE
     {"0237", "0205", "00ED", "00CD" }, // I_ACUTE
@@ -192,10 +194,8 @@ void keyboard_post_init_user(void) {
     rgb_matrix_enable();
 }
 
-/* Runs constantly in the background, in a loop. */
-void matrix_scan_user(void) {
-    // RGB timeout logic.
-    if(rgb_time_out_enable && rgb_enabled_flag) {
+void handle_rgb_timeout(void) {
+    if (rgb_time_out_enable && rgb_enabled_flag) {
         // If the key event counter is not zero then some key was pressed down but not released, thus reset the timeout counter.
         if (key_event_counter) {
             idle_second_counter = 0;
@@ -212,8 +212,9 @@ void matrix_scan_user(void) {
             idle_second_counter = 0;
         }
     }
+}
 
-    // OS mode indicator LED timeout logic.
+void handle_os_mode_led_timeout(void) {
     if(os_mode_led_flag) {
         // Update the second counter after each second.
         if (timer_elapsed(os_ind_led_timer) > MILLISECONDS_IN_SECOND) {
@@ -227,6 +228,12 @@ void matrix_scan_user(void) {
             os_ind_led_second_counter = 0;
         }
     }
+}
+
+/* Runs constantly in the background, in a loop. */
+void matrix_scan_user(void) {
+    handle_rgb_timeout();
+    handle_os_mode_led_timeout();
 };
 
 /* Sends the given accented letter. */
@@ -372,48 +379,34 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
 /* Runs everytime a layer change happens */
 layer_state_t layer_state_set_user(layer_state_t state) {
-    switch (get_highest_layer(state)) {
-        /* When turning on the numpad, make sure NUM LOCK is on */
-        case _NL:
-            bool num_lock = host_keyboard_led_state().num_lock;
-            if (!num_lock) { // If NUM LOCK isn't on, turn it on.
-                register_code(KC_NUM);
-                unregister_code(KC_NUM);
-            }
-            break;
-        /* No special logic for the other layers */
-        default:
-            break;
+    /* When turning on the numpad, make sure NUM LOCK is on */
+    if (get_highest_layer(state) == _NL && !host_keyboard_led_state().num_lock) {
+        tap_code(KC_NUM);
     }
-  return state;
+    /* No special logic for the other layers */
+    return state;
+}
+
+/* Helper: set an LED from HSV with brightness scaling */
+static void set_led_hsv(uint8_t index, HSV hsv) {
+    RGB rgb = hsv_to_rgb(hsv);
+    float f = (float)rgb_matrix_config.hsv.v / UINT8_MAX;
+    rgb_matrix_set_color(index, f * rgb.r, f * rgb.g, f * rgb.b);
 }
 
 void set_layer_color(int layer) {
     for (int i = 0; i < RGB_MATRIX_LED_COUNT; i++) {
         /* Special Indicator Logic */
         if (i == OS_MODE_IND_LED && (os_mode_led_flag || IS_LAYER_ON(_FL))) { // OS indicator LED
-            HSV win_hsv = WIN_IND;
-            HSV lnx_hsv = LNX_IND;
-
-            RGB rgb = hsv_to_rgb(os_mode == WINDOWS ? win_hsv : lnx_hsv);
-            float f = (float)rgb_matrix_config.hsv.v / UINT8_MAX;
-            rgb_matrix_set_color(i, f * rgb.r, f * rgb.g, f * rgb.b);
+            set_led_hsv(i, os_mode == WINDOWS ? (HSV)WIN_IND : (HSV)LNX_IND);
             continue;
         }
         if (i == CAPS_LOCK_IND_LED && host_keyboard_led_state().caps_lock) { // Caps Lock indicator LED
-            HSV hsv = CAPS_IND;
-
-            RGB rgb = hsv_to_rgb(hsv);
-            float f = (float)rgb_matrix_config.hsv.v / UINT8_MAX;
-            rgb_matrix_set_color(i, f * rgb.r, f * rgb.g, f * rgb.b);
+            set_led_hsv(i, (HSV)CAPS_IND);
             continue;
         }
         if (i == SCRL_LOCK_IND_LED && host_keyboard_led_state().scroll_lock) { // Scroll Lock indicator LED
-            HSV hsv = SCRL_IND;
-
-            RGB rgb = hsv_to_rgb(hsv);
-            float f = (float)rgb_matrix_config.hsv.v / UINT8_MAX;
-            rgb_matrix_set_color(i, f * rgb.r, f * rgb.g, f * rgb.b);
+            set_led_hsv(i, (HSV)SCRL_IND);
             continue;
         }
         /* Normal Logic */
@@ -423,9 +416,7 @@ void set_layer_color(int layer) {
             .v = pgm_read_byte(&ledmap[layer][i][2]),
         };
         if (hsv.h || hsv.s || hsv.v) {
-            RGB rgb = hsv_to_rgb(hsv);
-            float f = (float)rgb_matrix_config.hsv.v / UINT8_MAX;
-            rgb_matrix_set_color(i, f * rgb.r, f * rgb.g, f * rgb.b);
+            set_led_hsv(i, hsv);
         } else {
             bool is_undefined = true;
 
@@ -440,9 +431,7 @@ void set_layer_color(int layer) {
                         .v = pgm_read_byte(&ledmap[lower_layer_j][i][2]),
                     };
                     if (lower_hsv.h || lower_hsv.s || lower_hsv.v) {
-                        RGB rgb = hsv_to_rgb(lower_hsv);
-                        float f = (float)rgb_matrix_config.hsv.v / UINT8_MAX;
-                        rgb_matrix_set_color(i, f * rgb.r, f * rgb.g, f * rgb.b);
+                        set_led_hsv(i, lower_hsv);
                         is_undefined = false;
                         break;
                     }
@@ -450,7 +439,7 @@ void set_layer_color(int layer) {
             }
 
             if (is_undefined) {
-                // If the values are all false then it's a transparent key and deactivate LED at this layer
+                // If the values are all false then it's a transparent key and the LED should be deactivated.
                 rgb_matrix_set_color(i, 0, 0, 0);
             }
         }

@@ -19,37 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include QMK_KEYBOARD_H
 #include "config.h"
 
-#define MILLISECONDS_IN_SECOND 1000
-
-#define COPPER {12, 255, 100}
-#define CPPR_BRT {12, 255, 225}
-#define CYAN {HSV_CYAN}
-#define WIN_IND {HSV_SPRINGGREEN} // Windows mode indicator LED color.
-#define LNX_IND {HSV_PURPLE}      // Linux mode indicator LED color.
-#define CAPS_IND {12, 255, 225}   // Caps Lock indicator LED color.
-#define SCRL_IND {12, 255, 225}   // Scroll Lock indicator LED color.
-#define ______ {HSV_OFF}          // 5 underscores instead of the 6 used by the KC_TRNS alias.
-
-#define RGB_TIME_OUT 300       // 300 seconds (5 minutes).
-#define CAPS_LOCK_IND_LED 50   // Index of the Caps Lock indicator LED (50 is the Caps Lock key).
-#define SCRL_LOCK_IND_LED 14   // Index of the Scroll Lock indicator LED (14 is the Scroll Lock key).
-#define OS_MODE_IND_LED 77     // Index of the OS mode indicator LED (77 is Win key).
-#define OS_MODE_IND_TIME_OUT 3 // 3 second timeout for the OS mode indicator LED.
-
 extern rgb_config_t rgb_matrix_config;
 
 bool rgb_enabled_flag;                  // Current LED state flag. If false then LED is off.
 bool rgb_time_out_enable;               // Idle LED toggle enable. If false then LED will not turn off after idle timeout.
-bool rgb_time_out_user_value;           // This holds the toggle value set by user with ROUT_TG. It's necessary as RGB_TOG changes timeout enable.
 uint16_t rgb_time_out_seconds;          // Idle LED timeout value, in seconds not milliseconds
 led_flags_t rgb_time_out_saved_flag;    // Store LED flag before timeout so it can be restored when LED is turned on again.
+
 uint8_t os_mode;                        // Stores the current OS mode.
 bool os_mode_led_flag;                  // Current OS indicator LED state flag. If false, then the LED is off.
-
-enum tapdance_keycodes {
-    TD_ALT_SL = 0, // Tap dance key to switch to Spanish layer
-    TD_GRV_NL      // Tap dance key to switch to Numpad layer
-};
 
 enum layout_names {
     _KL=0,       // Keys Layout: The main keyboard layout that has all the characters
@@ -81,30 +59,33 @@ enum custom_keycodes {
     OS_TOG                 // Toggle OS mode between Windows and Linux
 };
 
+enum tapdance_keycodes {
+    TD_ALT_SL = 0, // Tap dance key to switch to Spanish layer
+    TD_GRV_NL      // Tap dance key to switch to Numpad layer
+};
+
 enum os {
     WINDOWS = 0,
     LINUX
 };
 
-const int num_accent_letters = 6;     // The number of accented letter keycodes
-const uint16_t accent_keycodes[] = {  // The list of accented letter keycodes
-    A_ACUTE,
-    E_ACUTE,
-    I_ACUTE,
-    O_ACUTE,
-    U_ACUTE,
-    ENE
+typedef struct {
+    const char *win_norm;
+    const char *win_shift;
+    const char *linux_norm;
+    const char *linux_shift;
+} accent_entry_t;
+
+static const accent_entry_t accent_table[] = {
+    {"0225", "0193", "00E1", "00C1" }, // A_ACUTE
+    {"0233", "0201", "00E9", "00C9" }, // E_ACUTE
+    {"0237", "0205", "00ED", "00CD" }, // I_ACUTE
+    {"0243", "0211", "00F3", "00D3" }, // O_ACUTE
+    {"0250", "0218", "00FA", "00DA" }, // U_ACUTE
+    {"0241", "0209", "00F1", "00D1" }, // ENE
 };
- // The alt and unicode codes for the accented letters in the same order as accent_keycodes.
- // Each line is {shift alt code}, {alt code}, {shift unicode}, {unicode}
-const char *accent_codes[6][4] = {
-    {"0193", "0225", "00C1", "00E1"}, // A
-    {"0201", "0233", "00C9", "00E9"}, // E
-    {"0205", "0237", "00CD", "00ED"}, // I
-    {"0211", "0243", "00D3", "00F3"}, // O
-    {"0218", "0250", "00DA", "00FA"}, // U
-    {"0209", "0241", "00D1", "00F1"}  // N
-};
+
+#define ACCENT_OFFSET A_ACUTE
 
 static uint16_t idle_timer;             // Idle LED timeout timer
 static uint16_t idle_second_counter;    // Idle LED seconds counter, counts seconds not milliseconds
@@ -156,33 +137,33 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 const uint8_t PROGMEM ledmap[][RGB_MATRIX_LED_COUNT][3] = {
     [_KL] = {
-        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,         ______, ______, ______,
-        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,
-        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,
-        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,
-        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,                         ______,
-        ______, ______, ______,                 ______,                         ______, ______, ______, ______,         ______, ______, ______,
+        ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______,         ______, ______, ______,
+        ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______, ______, ______, ______, ______,
+        ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______, ______, ______, ______, ______,
+        ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______,
+        ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______,   ______,                           ______,
+        ______,   ______,   ______,                       ______,                                 ______,   ______,   ______,   ______,         ______, ______, ______,
         /* Boarder; starts bottom right and moves clockwise */
-        COPPER, COPPER, COPPER, COPPER, COPPER, COPPER, COPPER, COPPER, COPPER, COPPER, COPPER, COPPER, COPPER,
-        COPPER, COPPER, COPPER,
-        COPPER, COPPER, COPPER, COPPER, COPPER, COPPER, COPPER, COPPER, COPPER, COPPER, COPPER, COPPER, COPPER,
-        COPPER, COPPER, COPPER
+        EDGE_LED, EDGE_LED, EDGE_LED, EDGE_LED, EDGE_LED, EDGE_LED, EDGE_LED, EDGE_LED, EDGE_LED, EDGE_LED, EDGE_LED, EDGE_LED, EDGE_LED,
+        EDGE_LED, EDGE_LED, EDGE_LED,
+        EDGE_LED, EDGE_LED, EDGE_LED, EDGE_LED, EDGE_LED, EDGE_LED, EDGE_LED, EDGE_LED, EDGE_LED, EDGE_LED, EDGE_LED, EDGE_LED, EDGE_LED,
+        EDGE_LED, EDGE_LED, EDGE_LED
     },
     [_FL] = {
-        ______, ______, ______, ______, ______, ______,   ______,   ______,   ______,   ______, ______, ______, ______,         ______, ______, ______,
-        ______, ______, ______, ______, ______, ______,   ______,   ______,   ______,   ______, ______, ______, ______, ______, ______, ______, ______,
-        ______, ______, ______, ______, ______, ______,   ______,   CPPR_BRT, CPPR_BRT, ______, ______, ______, ______, ______, ______, ______, ______,
-        ______, ______, ______, ______, ______, ______,   ______,   ______,   ______,   ______, ______, ______, ______,
-        ______, ______, ______, ______, ______, CPPR_BRT, CPPR_BRT, ______,   ______,   ______, ______, ______,                         ______,
-        ______, ______, ______,                 ______,                                 ______, ______, ______, ______,         ______, ______, ______
+        ______, ______, ______, ______, ______, ______,  ______,  ______,  ______,  ______, ______, ______, ______,         ______, ______, ______,
+        ______, ______, ______, ______, ______, ______,  ______,  ______,  ______,  ______, ______, ______, ______, ______, ______, ______, ______,
+        ______, ______, ______, ______, ______, ______,  ______,  KEY_LED, KEY_LED, ______, ______, ______, ______, ______, ______, ______, ______,
+        ______, ______, ______, ______, ______, ______,  ______,  ______,  ______,  ______, ______, ______, ______,
+        ______, ______, ______, ______, ______, KEY_LED, KEY_LED, ______,  ______,  ______, ______, ______,                         ______,
+        ______, ______, ______,                 ______,                             ______, ______, ______, ______,         ______, ______, ______
     },
     [_NL] = {
-        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,             CPPR_BRT, CPPR_BRT, CPPR_BRT,
-        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,   ______,   CPPR_BRT, CPPR_BRT, CPPR_BRT,
-        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,   CPPR_BRT, CPPR_BRT, CPPR_BRT, CPPR_BRT,
-        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, CPPR_BRT,
-        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,                               ______,
-        ______, ______, ______,                 ______,                         ______, ______, ______, ______,             ______,   ______,   ______
+        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,           KEY_LED, KEY_LED, KEY_LED,
+        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,  ______,  KEY_LED, KEY_LED, KEY_LED,
+        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,  KEY_LED, KEY_LED, KEY_LED, KEY_LED,
+        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, KEY_LED,
+        ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,                            ______,
+        ______, ______, ______,                 ______,                         ______, ______, ______, ______,           ______,  ______,  ______
     },
     [_SL] = {
         ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,         ______, ______, ______,
@@ -190,7 +171,7 @@ const uint8_t PROGMEM ledmap[][RGB_MATRIX_LED_COUNT][3] = {
         ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,
         ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,
         ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______, ______,                         ______,
-        ______, ______, CYAN,                   ______,                         ______, ______, ______, ______,         ______, ______, ______
+        ______, ______, SP_IND,                 ______,                         ______, ______, ______, ______,         ______, ______, ______
     }
 };
 
@@ -213,6 +194,7 @@ void keyboard_post_init_user(void) {
 
 /* Runs constantly in the background, in a loop. */
 void matrix_scan_user(void) {
+    // RGB timeout logic.
     if(rgb_time_out_enable && rgb_enabled_flag) {
         // If the key event counter is not zero then some key was pressed down but not released, thus reset the timeout counter.
         if (key_event_counter) {
@@ -231,6 +213,7 @@ void matrix_scan_user(void) {
         }
     }
 
+    // OS mode indicator LED timeout logic.
     if(os_mode_led_flag) {
         // Update the second counter after each second.
         if (timer_elapsed(os_ind_led_timer) > MILLISECONDS_IN_SECOND) {
@@ -246,20 +229,17 @@ void matrix_scan_user(void) {
     }
 };
 
-#define MODS_SHIFT  (get_mods() & MOD_MASK_SHIFT)
-#define MODS_CTRL   (get_mods() & MOD_MASK_CTRL)
-#define MODS_ALT    (get_mods() & MOD_MASK_ALT)
-
 /* Sends the given accented letter. */
 void send_accent(uint16_t keycode) {
-    for (int i = 0; i < num_accent_letters; i++) {
-        if (accent_keycodes[i] == keycode) {
-            if (os_mode == WINDOWS) {
-                send_alt_code(accent_codes[i][MODS_SHIFT ? 0 : 1]);
-            } else {
-                send_unicode(accent_codes[i][MODS_SHIFT ? 2 : 3]);
-            }
-        }
+    uint16_t idx = keycode - ACCENT_OFFSET;
+    if (idx >= ARRAY_SIZE(accent_table)) return; // out of range
+
+    const accent_entry_t *entry = &accent_table[idx];
+
+    if (os_mode == WINDOWS) {
+        send_alt_code(MODS_SHIFT ? entry->win_shift : entry->win_norm);
+    } else {
+        send_unicode(MODS_SHIFT ? entry->linux_shift : entry->linux_norm);
     }
 }
 
@@ -311,40 +291,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             return true;
         /* Spanish Letters and Punctuation */
-        case A_ACUTE: // A with acute accent
+        case A_ACUTE ... ENE: // Any of the Spanish accented letters
             if (record->event.pressed) {
-                send_accent(A_ACUTE);
-                layer_off(3);
-            }
-            return false;
-        case E_ACUTE: // E with acute accent
-            if (record->event.pressed) {
-                send_accent(E_ACUTE);
-                layer_off(3);
-            }
-            return false;
-        case I_ACUTE: // I with acute accent
-            if (record->event.pressed) {
-                send_accent(I_ACUTE);
-                layer_off(3);
-            }
-            return false;
-        case O_ACUTE: // O with acute accent
-            if (record->event.pressed) {
-                send_accent(O_ACUTE);
-                layer_off(3);
-            }
-            return false;
-        case U_ACUTE: // U with acute accent
-            if (record->event.pressed) {
-                send_accent(U_ACUTE);
-                layer_off(3);
-            }
-            return false;
-        case ENE: // N with tilde accent
-            if (record->event.pressed) {
-                send_accent(ENE);
-                layer_off(3);
+                send_accent(keycode);
+                layer_off(_SL);
             }
             return false;
         case INV_EXC:
@@ -355,7 +305,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     } else {
                         send_unicode("00A1");
                     }
-                    layer_off(3);
+                    layer_off(_SL);
                 } else {
                     SEND_STRING("1");
                 }
@@ -369,7 +319,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     } else {
                         send_unicode("00BF");
                     }
-                    layer_off(3);
+                    layer_off(_SL);
                 } else {
                     SEND_STRING("/");
                 }

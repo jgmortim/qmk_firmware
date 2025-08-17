@@ -17,6 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include QMK_KEYBOARD_H
+#include "config.h"
 
 #define MILLISECONDS_IN_SECOND 1000
 
@@ -83,6 +84,26 @@ enum custom_keycodes {
 enum os {
     WINDOWS = 0,
     LINUX
+};
+
+const int num_accent_letters = 6;     // The number of accented letter keycodes
+const uint16_t accent_keycodes[] = {  // The list of accented letter keycodes
+    A_ACUTE,
+    E_ACUTE,
+    I_ACUTE,
+    O_ACUTE,
+    U_ACUTE,
+    ENE
+};
+ // The alt and unicode codes for the accented letters in the same order as accent_keycodes.
+ // Each line is {shift alt code}, {alt code}, {shift unicode}, {unicode}
+const char *accent_codes[6][4] = {
+    {"0193", "0225", "00C1", "00E1"}, // A
+    {"0201", "0233", "00C9", "00E9"}, // E
+    {"0205", "0237", "00CD", "00ED"}, // I
+    {"0211", "0243", "00D3", "00F3"}, // O
+    {"0218", "0250", "00DA", "00FA"}, // U
+    {"0209", "0241", "00D1", "00F1"}  // N
 };
 
 static uint16_t idle_timer;             // Idle LED timeout timer
@@ -225,65 +246,22 @@ void matrix_scan_user(void) {
     }
 };
 
-/* Executes the given alt code (Windows only). */
-void send_alt_code(char code[]) {
-    uint8_t mod_state = get_mods(); // Gets the current mods.
-    unregister_mods(mod_state);     // Turns all active mods off.
-
-    SEND_STRING(SS_DOWN(X_LALT));
-    for(int i = 0; code[i] != '\0';  i++) {
-        switch(code[i]) {
-            case '1': SEND_STRING(SS_TAP(X_KP_1)); break;
-            case '2': SEND_STRING(SS_TAP(X_KP_2)); break;
-            case '3': SEND_STRING(SS_TAP(X_KP_3)); break;
-            case '4': SEND_STRING(SS_TAP(X_KP_4)); break;
-            case '5': SEND_STRING(SS_TAP(X_KP_5)); break;
-            case '6': SEND_STRING(SS_TAP(X_KP_6)); break;
-            case '7': SEND_STRING(SS_TAP(X_KP_7)); break;
-            case '8': SEND_STRING(SS_TAP(X_KP_8)); break;
-            case '9': SEND_STRING(SS_TAP(X_KP_9)); break;
-            default:  SEND_STRING(SS_TAP(X_KP_0)); break;
-        }
-    }
-    SEND_STRING(SS_UP(X_LALT));
-
-    register_mods(mod_state); // Restores the mods to their original state.
-}
-
-/* Inserts the given Unicode character via Unicode-entry mode (Linux only). */
-void send_unicode(const char *code) {
-    uint8_t mod_state = get_mods();     // Gets the current mods.
-    unregister_mods(mod_state);         // Turns all active mods off.
-
-    SEND_STRING(SS_LCTL(SS_LSFT("u"))); // Ctrl + Shift  + U,
-    SEND_STRING(code);                  // type in the code,
-    SEND_STRING(SS_TAP(X_ENT));         // and press enter.
-
-    register_mods(mod_state);           // Restores the mods to their original state.
-}
-
-/* Enters the given command into the Windows Run dialog (Windows only). */
-void windows_run(const char *command) {
-    SEND_STRING(SS_LGUI("r") SS_DELAY(50)); // Open the run dialog,
-    SEND_STRING(command);                   // type in the command,
-    SEND_STRING(SS_TAP(X_ENT));             // and press enter.
-}
-
-/* Enters the given command into the Linux Run dialog (Linux only). */
-void linux_run(const char *command) {
-    uint8_t mod_state = get_mods();                  // Gets the current mods.
-    unregister_mods(mod_state);                      // Turns all active mods off.
-
-    SEND_STRING(SS_LALT(SS_TAP(X_F2)) SS_DELAY(50)); // Open the run dialog,
-    SEND_STRING(command);                            // type in the command,
-    SEND_STRING(SS_TAP(X_ENT));                      // and press enter.
-
-    register_mods(mod_state);                        // Restores the mods to their original state.
-}
-
 #define MODS_SHIFT  (get_mods() & MOD_MASK_SHIFT)
 #define MODS_CTRL   (get_mods() & MOD_MASK_CTRL)
 #define MODS_ALT    (get_mods() & MOD_MASK_ALT)
+
+/* Sends the given accented letter. */
+void send_accent(uint16_t keycode) {
+    for (int i = 0; i < num_accent_letters; i++) {
+        if (accent_keycodes[i] == keycode) {
+            if (os_mode == WINDOWS) {
+                send_alt_code(accent_codes[i][MODS_SHIFT ? 0 : 1]);
+            } else {
+                send_unicode(accent_codes[i][MODS_SHIFT ? 2 : 3]);
+            }
+        }
+    }
+}
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     static uint32_t key_timer;
@@ -335,61 +313,37 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         /* Spanish Letters and Punctuation */
         case A_ACUTE: // A with acute accent
             if (record->event.pressed) {
-                if (os_mode == WINDOWS) {
-                    send_alt_code(MODS_SHIFT ? "0193" : "0225");
-                } else {
-                    send_unicode(MODS_SHIFT ? "00C1" : "00E1");
-                }
+                send_accent(A_ACUTE);
                 layer_off(3);
             }
             return false;
         case E_ACUTE: // E with acute accent
             if (record->event.pressed) {
-                if (os_mode == WINDOWS) {
-                    send_alt_code(MODS_SHIFT ? "0201" : "0233");
-                } else {
-                    send_unicode(MODS_SHIFT ? "00C9" : "00E9");
-                }
+                send_accent(E_ACUTE);
                 layer_off(3);
             }
             return false;
         case I_ACUTE: // I with acute accent
             if (record->event.pressed) {
-                if (os_mode == WINDOWS) {
-                    send_alt_code(MODS_SHIFT ? "0205" : "0237");
-                } else {
-                    send_unicode(MODS_SHIFT ? "00CD" : "00ED");
-                }
+                send_accent(I_ACUTE);
                 layer_off(3);
             }
             return false;
         case O_ACUTE: // O with acute accent
             if (record->event.pressed) {
-                if (os_mode == WINDOWS) {
-                    send_alt_code(MODS_SHIFT ? "0211" : "0243");
-                } else {
-                    send_unicode(MODS_SHIFT ? "00D3" : "00F3");
-                }
+                send_accent(O_ACUTE);
                 layer_off(3);
             }
             return false;
         case U_ACUTE: // U with acute accent
             if (record->event.pressed) {
-                if (os_mode == WINDOWS) {
-                    send_alt_code(MODS_SHIFT ? "0218" : "0250");
-                } else {
-                    send_unicode(MODS_SHIFT ? "00DA" : "00FA");
-                }
+                send_accent(U_ACUTE);
                 layer_off(3);
             }
             return false;
         case ENE: // N with tilde accent
             if (record->event.pressed) {
-                if (os_mode == WINDOWS) {
-                    send_alt_code(MODS_SHIFT ? "0209" : "0241");
-                } else {
-                    send_unicode(MODS_SHIFT ? "00D1" : "00F1");
-                }
+                send_accent(ENE);
                 layer_off(3);
             }
             return false;

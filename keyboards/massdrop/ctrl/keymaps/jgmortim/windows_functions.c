@@ -27,6 +27,8 @@ static const char *const numpad_key_taps[] = {
 
 /* Opens the Windows Run dialog and enters the given command. */
 void windows_run(const char *command) {
+    if (!command || !*command) return;      // Skip if input is empty.
+
     SEND_STRING(SS_LGUI("r") SS_DELAY(50)); // Open the run dialog,
     SEND_STRING(command);                   // type in the command,
     SEND_STRING(SS_TAP(X_ENT));             // and press enter.

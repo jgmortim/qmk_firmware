@@ -238,10 +238,10 @@ void matrix_scan_user(void) {
 
 /* Sends the given accented letter. */
 void send_accent(uint16_t keycode) {
-    uint16_t idx = keycode - ACCENT_OFFSET;
-    if (idx >= ARRAY_SIZE(accent_table)) return; // out of range
+    uint16_t index = keycode - ACCENT_OFFSET;
+    if (index >= ARRAY_SIZE(accent_table)) return; // out of range
 
-    const accent_entry_t *entry = &accent_table[idx];
+    const accent_entry_t *entry = &accent_table[index];
 
     if (os_mode == WINDOWS) {
         send_alt_code(MODS_SHIFT ? entry->win_shift : entry->win_norm);

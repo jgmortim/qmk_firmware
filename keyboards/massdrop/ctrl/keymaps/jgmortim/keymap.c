@@ -242,11 +242,12 @@ void send_accent(uint16_t keycode) {
     if (index >= ARRAY_SIZE(accent_table)) return; // out of range
 
     const accent_entry_t *entry = &accent_table[index];
+    const bool uppercase = MODS_SHIFT || host_keyboard_led_state().caps_lock;
 
     if (os_mode == WINDOWS) {
-        send_alt_code(MODS_SHIFT ? entry->win_shift : entry->win_norm);
+        send_alt_code(uppercase ? entry->win_shift : entry->win_norm);
     } else {
-        send_unicode(MODS_SHIFT ? entry->linux_shift : entry->linux_norm);
+        send_unicode(uppercase ? entry->linux_shift : entry->linux_norm);
     }
 }
 

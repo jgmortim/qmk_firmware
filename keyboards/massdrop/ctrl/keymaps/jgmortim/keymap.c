@@ -29,6 +29,8 @@ led_flags_t rgb_time_out_saved_flag;    // Store LED flag before timeout so it c
 uint8_t os_mode;                        // Stores the current OS mode.
 bool os_mode_led_flag;                  // Current OS indicator LED state flag. If false, then the LED is off.
 
+uint8_t audio_output;                   // Stores the current audio output device. Initialized to the first device.
+
 enum layout_names {
     _KL=0,       // Keys Layout: The main keyboard layout that has all the characters
     _FL,         // Function Layout: The function key activated layout with default functions
@@ -37,13 +39,13 @@ enum layout_names {
 };
 
 enum ctrl_keycodes {
-    U_T_AUTO = SAFE_RANGE, //USB Extra Port Toggle Auto Detect / Always Active
-    U_T_AGCR,              //USB Toggle Automatic GCR control
-    DBG_TOG,               //DEBUG Toggle On / Off
-    DBG_MTRX,              //DEBUG Toggle Matrix Prints
-    DBG_KBD,               //DEBUG Toggle Keyboard Prints
-    DBG_MOU,               //DEBUG Toggle Mouse Prints
-    MD_BOOT,               //Restart into bootloader after hold timeout
+    U_T_AUTO = SAFE_RANGE, // USB Extra Port Toggle Auto Detect / Always Active
+    U_T_AGCR,              // USB Toggle Automatic GCR control
+    DBG_TOG,               // DEBUG Toggle On / Off
+    DBG_MTRX,              // DEBUG Toggle Matrix Prints
+    DBG_KBD,               // DEBUG Toggle Keyboard Prints
+    DBG_MOU,               // DEBUG Toggle Mouse Prints
+    MD_BOOT,               // Restart into bootloader after hold timeout
 };
 
 enum custom_keycodes {
@@ -187,6 +189,7 @@ void matrix_init_user(void) {
     rgb_time_out_saved_flag = rgb_matrix_get_flags();   // Save RGB matrix state for when keyboard comes back from ide.
     os_mode = WINDOWS;                                  // Default to Windows mode.
     os_mode_led_flag = false;                           // Default OS indicator LED to off.
+    audio_output = 0;                                   // Assume the first device is selected.
 };
 
 /* Runs just one time after everything else has initialized. */
@@ -295,6 +298,18 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case KC_S:
             if (record->event.pressed && get_mods() == MOD_BIT(KC_LGUI) && os_mode == WINDOWS) {
                 windows_run("SnippingTool");
+                return false;
+            }
+            return true;
+        /* Change Win + a to toggle audio output devices instead of Action Center */
+        case KC_A:
+            if (record->event.pressed && get_mods() == MOD_BIT(KC_LGUI) && os_mode == WINDOWS) {
+                audio_output = (audio_output + 1) % NUMBER_OF_AUDIO_OUTPUT_DEVICES; // Increment to the next device.
+                SEND_STRING(SS_LGUI(SS_LCTL("v")) SS_DELAY(200)); // Open the sound output page of quick settings.
+                for (int i = 0; i < audio_output; i++) {
+                    SEND_STRING(SS_TAP(X_DOWN)); // Press the down arrow until the appropriate device is highlighted.
+                }
+                SEND_STRING(SS_TAP(X_ENT) SS_TAP(X_ESC)); // Make the selection and close the menu.
                 return false;
             }
             return true;

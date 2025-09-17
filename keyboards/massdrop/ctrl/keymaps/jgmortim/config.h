@@ -18,6 +18,8 @@
 #define CAPS_LOCK_IND_LED 50   // Index of the Caps Lock indicator LED (50 is the Caps Lock key).
 #define OS_MODE_IND_LED 77     // Index of the OS mode indicator LED (77 is Win key).
 
+#define NUMBER_OF_AUDIO_OUTPUT_DEVICES 2
+
 #define MODS_SHIFT  (get_mods() & MOD_MASK_SHIFT)
 #define MODS_CTRL   (get_mods() & MOD_MASK_CTRL)
 #define MODS_ALT    (get_mods() & MOD_MASK_ALT)

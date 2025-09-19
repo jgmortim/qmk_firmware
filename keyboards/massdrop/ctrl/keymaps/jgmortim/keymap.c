@@ -21,15 +21,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 extern rgb_config_t rgb_matrix_config;
 
-bool rgb_enabled_flag;                  // Current LED state flag. If false then LED is off.
-bool rgb_time_out_enable;               // Idle LED toggle enable. If false then LED will not turn off after idle timeout.
-uint16_t rgb_time_out_seconds;          // Idle LED timeout value, in seconds not milliseconds
-led_flags_t rgb_time_out_saved_flag;    // Store LED flag before timeout so it can be restored when LED is turned on again.
+bool rgb_enabled_flag;               // Current LED state flag. If false then LED is off.
+bool rgb_time_out_enable;            // Idle LED toggle enable. If false then LED will not turn off after idle timeout.
+uint16_t rgb_time_out_seconds;       // Idle LED timeout value, in seconds not milliseconds
+led_flags_t rgb_time_out_saved_flag; // Store LED flag before timeout so it can be restored when LED is turned on again.
 
-uint8_t os_mode;                        // Stores the current OS mode.
-bool os_mode_led_flag;                  // Current OS indicator LED state flag. If false, then the LED is off.
+uint8_t os_mode;                     // Stores the current OS mode.
+bool os_mode_led_flag;               // Current OS indicator LED state flag. If false, then the LED is off.
 
-uint8_t audio_output;                   // Stores the current audio output device. Initialized to the first device.
+uint8_t audio_output;                // Stores the current audio output device. Initialized to the first device.
+bool audio_ind_led_flag;             // Current audio output indicator LED state flag. If false, then the LED is off.
 
 enum layout_names {
     _KL=0,       // Keys Layout: The main keyboard layout that has all the characters
@@ -97,6 +98,9 @@ static uint8_t key_event_counter;       // This counter is used to check if any 
 
 static uint16_t os_ind_led_timer;          // OS toggle LED timeout timer
 static uint16_t os_ind_led_second_counter; // OS toggle LED seconds counter, counts seconds not milliseconds
+
+static uint16_t audio_ind_led_timer;          // audio LED timeout timer
+static uint16_t audio_ind_led_second_counter; // audio LED seconds counter, counts seconds not milliseconds
 
 /* Associate tap dance keys with their functionality */
 tap_dance_action_t tap_dance_actions[] = {
@@ -190,6 +194,7 @@ void matrix_init_user(void) {
     os_mode = WINDOWS;                                  // Default to Windows mode.
     os_mode_led_flag = false;                           // Default OS indicator LED to off.
     audio_output = 0;                                   // Assume the first device is selected.
+    audio_ind_led_flag = false;                         // Default audio indicator LED to off.
 };
 
 /* Runs just one time after everything else has initialized. */
@@ -233,10 +238,27 @@ void handle_os_mode_led_timeout(void) {
     }
 }
 
+void handle_audio_ind_led_timeout(void) {
+    if(audio_ind_led_flag) {
+        // Update the second counter after each second.
+        if (timer_elapsed(audio_ind_led_timer) > MILLISECONDS_IN_SECOND) {
+            audio_ind_led_second_counter++;
+            audio_ind_led_timer = timer_read();
+        }
+
+        // Turn off audio indicator LED after timeout reached.
+        if (audio_ind_led_second_counter >= AUDIO_IND_TIME_OUT) {
+            audio_ind_led_flag = false;
+            audio_ind_led_second_counter = 0;
+        }
+    }
+}
+
 /* Runs constantly in the background, in a loop. */
 void matrix_scan_user(void) {
     handle_rgb_timeout();
     handle_os_mode_led_timeout();
+    handle_audio_ind_led_timeout();
 };
 
 /* Sends the given accented letter. */
@@ -280,14 +302,15 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case OS_TOG:
             if (record->event.pressed) {
                 os_mode ^= (WINDOWS | LINUX);
-                os_mode_led_flag = true;
+                os_ind_led_timer = timer_read();
                 os_ind_led_second_counter = 0;
+                os_mode_led_flag = true;
                 return false;
             }
             return true;
         /* Change Win + c to be Calculator instead of Cortana */
         case KC_C:
-            if (record->event.pressed && get_mods() == MOD_BIT(KC_LGUI)) {
+            if (record->event.pressed && MODS_GUI) {
                 os_mode == WINDOWS
                     ? windows_run("CALC")
                     : linux_run("gnome-calculator");
@@ -296,20 +319,23 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             return true;
         /* Change Win + s to be Snipping Tool instead of search */
         case KC_S:
-            if (record->event.pressed && get_mods() == MOD_BIT(KC_LGUI) && os_mode == WINDOWS) {
+            if (record->event.pressed && MODS_GUI && os_mode == WINDOWS) {
                 windows_run("SnippingTool");
                 return false;
             }
             return true;
         /* Change Win + a to toggle audio output devices instead of Action Center */
         case KC_A:
-            if (record->event.pressed && get_mods() == MOD_BIT(KC_LGUI) && os_mode == WINDOWS) {
+            if (record->event.pressed && MODS_GUI && os_mode == WINDOWS) {
                 audio_output = (audio_output + 1) % NUMBER_OF_AUDIO_OUTPUT_DEVICES; // Increment to the next device.
                 SEND_STRING(SS_LGUI(SS_LCTL("v")) SS_DELAY(200)); // Open the sound output page of quick settings.
                 for (int i = 0; i < audio_output; i++) {
                     SEND_STRING(SS_TAP(X_DOWN)); // Press the down arrow until the appropriate device is highlighted.
                 }
                 SEND_STRING(SS_TAP(X_ENT) SS_TAP(X_ESC)); // Make the selection and close the menu.
+                audio_ind_led_timer = timer_read();
+                audio_ind_led_second_counter = 0;
+                audio_ind_led_flag = true;
                 return false;
             }
             return true;
@@ -423,6 +449,10 @@ void set_layer_color(int layer) {
         }
         if (i == SCRL_LOCK_IND_LED && host_keyboard_led_state().scroll_lock) { // Scroll Lock indicator LED
             set_led_hsv(i, (HSV)SCRL_IND);
+            continue;
+        }
+        if (i == AUDIO_IND_LED_OFFSET + audio_output && audio_ind_led_flag) { // Audio output indicator LED
+            set_led_hsv(i, (HSV)KEY_LED);
             continue;
         }
         /* Normal Logic */

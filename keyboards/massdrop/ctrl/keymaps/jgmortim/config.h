@@ -13,16 +13,19 @@
 
 #define RGB_TIME_OUT 300       // 300 seconds (5 minutes).
 #define OS_MODE_IND_TIME_OUT 3 // 3 second timeout for the OS mode indicator LED.
+#define AUDIO_IND_TIME_OUT 1   // 1 second timeout for the audio output indicator LED.
 
 #define SCRL_LOCK_IND_LED 14   // Index of the Scroll Lock indicator LED (14 is the Scroll Lock key).
 #define CAPS_LOCK_IND_LED 50   // Index of the Caps Lock indicator LED (50 is the Caps Lock key).
 #define OS_MODE_IND_LED 77     // Index of the OS mode indicator LED (77 is Win key).
+#define AUDIO_IND_LED_OFFSET 17 // The numbers key are backlit to indicate which audio output device is select (17 is the 1 key).
 
 #define NUMBER_OF_AUDIO_OUTPUT_DEVICES 2
 
 #define MODS_SHIFT  (get_mods() & MOD_MASK_SHIFT)
 #define MODS_CTRL   (get_mods() & MOD_MASK_CTRL)
 #define MODS_ALT    (get_mods() & MOD_MASK_ALT)
+#define MODS_GUI    (get_mods() & MOD_MASK_GUI)
 
 
 /* windows_functions.c */

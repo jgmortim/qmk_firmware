@@ -328,7 +328,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case KC_A:
             if (record->event.pressed && MODS_GUI && os_mode == WINDOWS) {
                 audio_output = (audio_output + 1) % NUMBER_OF_AUDIO_OUTPUT_DEVICES; // Increment to the next device.
-                SEND_STRING(SS_LGUI(SS_LCTL("v")) SS_DELAY(200)); // Open the sound output page of quick settings.
+                SEND_STRING(SS_LGUI(SS_LCTL("v")) SS_DELAY(250)); // Open the sound output page of quick settings.
                 for (int i = 0; i < audio_output; i++) {
                     SEND_STRING(SS_TAP(X_DOWN)); // Press the down arrow until the appropriate device is highlighted.
                 }
